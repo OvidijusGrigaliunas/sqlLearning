@@ -8,9 +8,9 @@ SELECT s.tconst                          AS id,
 FROM shows as s
          INNER JOIN ratings r on s.tconst = r.tconst
          INNER JOIN (SELECT crew.tconst, regexp_split_to_table(crew.directors, E',') AS directors FROM crew) AS c
-                    on c.tconst = s.tconst
+                    ON c.tconst = s.tconst
          INNER JOIN data AS d
-                    on d.nconst = c.directors
+                    ON d.nconst = c.directors
 WHERE s."titleType" = 'movie'
 GROUP BY s.tconst,
          s."primaryTitle",
@@ -18,4 +18,4 @@ GROUP BY s.tconst,
          r."numVotes",
          s."startYear",
          s.genres
-ORDER BY s.tconst;
+ORDER BY s."tconst";

@@ -1,8 +1,8 @@
 SELECT s.tconst                          AS id,
-       s."primaryTitle"                  as title,
+       s."primaryTitle"                  AS title,
        s."startYear"                     AS released,
        s.genres                          AS genre,
-       r."averageRating"                 as rating,
+       r."averageRating"                 AS rating,
        string_agg(d."primaryName", ', ') AS directors
 FROM shows AS s
          INNER JOIN ratings AS r ON r.tconst = s.tconst
