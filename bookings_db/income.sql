@@ -18,4 +18,4 @@ FROM (SELECT DISTINCT extract(YEAR from b.book_date)                      AS yea
                       OVER (PARTITION BY extract(Month from b.book_date)) AS monthly_income
       FROM bookings as b) as b
          INNER JOIN sold_tickets as t
-                    ON t.year = b.year AND t.month = b.month
+                    ON b.year = t.year AND b.month = t.month
