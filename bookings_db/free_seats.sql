@@ -1,0 +1,11 @@
+WITH not_empty_seats as (SELECT DISTINCT f.aircraft_code, bp.seat_no
+                         FROM (SELECT flight_id, aircraft_code FROM flights WHERE flight_id = '25078') AS f
+                                  LEFT JOIN boarding_passes bp ON f.flight_id = bp.flight_id)
+SELECT DISTINCT s2.seat_no AS free_seat_no
+FROM (SELECT DISTINCT s.seat_no
+      FROM seats AS s,
+           not_empty_seats AS nes
+      WHERE s.aircraft_code = nes.aircraft_code) AS s2
+LEFT OUTER JOIN not_empty_seats as nes2 ON s2.seat_no = nes2.seat_no
+WHERE nes2.seat_no IS NULL
+ORDER BY free_seat_no;
