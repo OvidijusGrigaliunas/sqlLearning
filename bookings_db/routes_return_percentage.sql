@@ -36,17 +36,64 @@ FROM (
 /* Oro uosto id pakeičiame į jo pavadinimą*/
          INNER JOIN airports_data ad1 ON ad1.airport_code = rp2.arrival_airport
          INNER JOIN airports_data ad2 ON ad2.airport_code = rp2.departure_airport;
-SELECT ttr1.arrival_airport,
-       ttr1.departure_airport,
-       COALESCE(ttr1.tickets_bought - ttr2.return_tickets_bought,0) AS tickets_bought,
-       ttr1.return_tickets_bought,
-       round((CAST(COALESCE(ttr1.return_tickets_bought, 0) AS NUMERIC) /
-              NULLIF(ttr1.tickets_bought - ttr2.return_tickets_bought, 0)) *
-             100, 2)                                    AS return_percentage
-FROM temp_table_return AS ttr1
-         LEFT JOIN temp_table_return AS ttr2
-                   ON ttr1.departure_airport = ttr2.arrival_airport AND ttr1.arrival_airport = ttr2.departure_airport
-ORDER BY COALESCE(ttr1.tickets_bought - ttr2.return_tickets_bought,0) DESC;
+
+CREATE TEMPORARY TABLE calc_distances
+AS (SELECT a.departure_airport,
+           a.arrival_airport,
+           a.departure_city,
+           a.arrival_city,
+           point_distance(ad1.coordinates, ad2.coordinates) as distance
+    FROM (SELECT DISTINCT (ad1.airport_name ->> 'en') AS departure_airport,
+                          (ad2.airport_name ->> 'en') AS arrival_airport,
+                          (ad1.city ->> 'en')         AS departure_city,
+                          (ad2.city ->> 'en')         AS arrival_city
+          FROM flights as f
+                   INNER JOIN airports_data ad1 on ad1.airport_code = f.arrival_airport
+                   INNER JOIN airports_data ad2 on ad2.airport_code = f.departure_airport) as a
+             INNER JOIN airports_data ad1 on (ad1.airport_name ->> 'en') = a.departure_airport
+             INNER JOIN airports_data ad2 on (ad2.airport_name ->> 'en') = a.arrival_airport);
+DROP TABLE return_stats;
+CREATE TABLE return_stats
+AS (SELECT ttr1.departure_airport,
+           ttr1.arrival_airport,
+           cd.departure_city,
+           cp1.pop_2021                                                  AS departure_city_pop,
+           cd.arrival_city,
+           cp2.pop_2021                                                  AS arrival_city_pop,
+           cd.distance,
+           COALESCE(ttr1.tickets_bought - ttr2.return_tickets_bought, 0) AS tickets_bought,
+           ttr1.return_tickets_bought,
+           round((CAST(COALESCE(ttr1.return_tickets_bought, 0) AS NUMERIC) /
+                  NULLIF(ttr1.tickets_bought - ttr2.return_tickets_bought, 0)) *
+                 100, 2)                                                 AS return_percentage
+    FROM temp_table_return AS ttr1
+             LEFT JOIN temp_table_return AS ttr2
+                       ON ttr1.departure_airport = ttr2.arrival_airport AND
+                          ttr1.arrival_airport = ttr2.departure_airport
+             LEFT JOIN calc_distances AS cd
+                       ON ttr1.departure_airport = cd.departure_airport AND
+                          ttr1.arrival_airport = cd.arrival_airport
+             LEFT JOIN (SELECT cp.city,
+                               federal_district,
+                               CAST(string_agg(cp.seperated_numb, '') AS INTEGER) AS pop_2021
+                        FROM (SELECT city,
+                                     federal_district,
+                                     regexp_split_to_table(pop_2021, E',') AS seperated_numb
+                              FROM city_population) as cp
+                        GROUP BY cp.city, federal_district) AS cp1
+                       ON cd.departure_city = cp1.city
+             LEFT JOIN (SELECT cp.city,
+                               federal_district,
+                               CAST(string_agg(cp.seperated_numb, '') AS INTEGER) AS pop_2021
+                        FROM (SELECT city,
+                                     federal_district,
+                                     regexp_split_to_table(pop_2021, E',') AS seperated_numb
+                              FROM city_population) as cp
+                        GROUP BY cp.city, federal_district) AS cp2
+                       ON cd.arrival_city = cp2.city
+    ORDER BY COALESCE(ttr1.tickets_bought - ttr2.return_tickets_bought, 0) DESC);
+
 DROP TABLE route_popularity;
 DROP TABLE temp_table_return;
+DROP TABLE calc_distances;
 
