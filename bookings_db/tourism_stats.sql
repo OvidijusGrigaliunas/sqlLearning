@@ -1,6 +1,6 @@
 WITH avg_city_stats AS (SELECT rs.arrival_city                  AS city,
-                               rs.arrival_city_pop              as population,
-                               sum(rs.tickets_bought)           as tickets_bought,
+                               rs.arrival_city_pop              AS population,
+                               sum(rs.tickets_bought)           AS tickets_bought,
                                round(avg(return_percentage), 3) AS average_return_rate
                         FROM return_stats AS rs
                         GROUP BY rs.arrival_city, rs.arrival_city_pop
