@@ -18,6 +18,7 @@ AS (SELECT f.departure_airport,
              t.passenger_id
     ORDER BY t.passenger_id);
 
+
 CREATE TEMPORARY TABLE temp_table_return AS
 SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
        (ad2.airport_name ->> 'en') AS departure_airport,
@@ -31,12 +32,13 @@ FROM (
                 sum(COALESCE(rp2.tickets_bought, 0)) AS return_tickets_bought
          FROM route_popularity AS rp1
                   LEFT JOIN route_popularity AS rp2
-             /* Tikriname ar yra skrydžių su tą priešinga kryptimi, kurio bilietą pirk tas pats žmogus velesnę dieną*/
-                            ON rp1.departure_airport = rp2.arrival_airport AND
-                               rp1.arrival_airport = rp2.departure_airport AND
-                               rp1.passenger_id = rp2.passenger_id AND rp1.scheduled_arrival < rp2.scheduled_departure
+             /* Tikriname ar yra skrydžių su tą priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
+                            ON rp1.arrival_airport = rp2.departure_airport AND
+                               rp1.passenger_id = rp2.passenger_id AND
+                               rp1.scheduled_arrival - rp2.scheduled_departure BETWEEN
+                                   '0 years 0 mons -14 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'
          GROUP BY rp1.arrival_airport, rp1.departure_airport) AS rp2
-/* Oro uosto id pakeičiame į jo pavadinimą*/
+         /* Oro uosto id pakeičiame į jo pavadinimą*/
          INNER JOIN airports_data ad1 ON ad1.airport_code = rp2.arrival_airport
          INNER JOIN airports_data ad2 ON ad2.airport_code = rp2.departure_airport;
 
@@ -56,21 +58,21 @@ AS (SELECT a.departure_airport,
              INNER JOIN airports_data ad1 ON (ad1.airport_name ->> 'en') = a.departure_airport
              INNER JOIN airports_data ad2 ON (ad2.airport_name ->> 'en') = a.arrival_airport);
 
-DROP TABLE return_stats;
+DROP TABLE week_stay;
 
-CREATE TABLE return_stats
+CREATE TABLE week_stay
 AS (SELECT ttr1.departure_airport,
            ttr1.arrival_airport,
            cd.departure_city,
-           cp1.pop_2021                                                  AS departure_city_pop,
+           cp1.pop_2021        AS departure_city_pop,
            cd.arrival_city,
-           cp2.pop_2021                                                  AS arrival_city_pop,
+           cp2.pop_2021        AS arrival_city_pop,
            cd.distance,
-           COALESCE(ttr1.tickets_bought - ttr2.return_tickets_bought, 0) AS tickets_bought,
+           ttr1.tickets_bought AS tickets_bought,
            ttr1.return_tickets_bought,
            round((CAST(COALESCE(ttr1.return_tickets_bought, 0) AS NUMERIC) /
-                  NULLIF(ttr1.tickets_bought - ttr2.return_tickets_bought, 0)) *
-                 100, 2)                                                 AS return_percentage
+                  NULLIF(ttr1.tickets_bought, 0)) *
+                 100, 2)       AS return_percentage
     FROM temp_table_return AS ttr1
              LEFT JOIN temp_table_return AS ttr2
                        ON ttr1.departure_airport = ttr2.arrival_airport AND
@@ -87,4 +89,3 @@ AS (SELECT ttr1.departure_airport,
 DROP TABLE route_popularity;
 DROP TABLE temp_table_return;
 DROP TABLE calc_distances;
-

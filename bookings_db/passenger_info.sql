@@ -1,4 +1,4 @@
-SELECT t.passenger_id,
+SELECT  t.passenger_id,
        t.ticket_no,
        tf.fare_conditions,
        tf.amount,
