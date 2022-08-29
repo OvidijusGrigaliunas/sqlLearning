@@ -1,4 +1,4 @@
-CREATE TEMPORARY TABLE rpop
+CREATE TEMPORARY TABLE route_pop
 AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
            (ad2.airport_name ->> 'en') AS arrival_airport,
            tickets_bought
@@ -14,11 +14,11 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
              INNER JOIN airports_data ad2 ON ad2.airport_code = a.departure_airport);
 
 SELECT rp.departure_airport, rp.arrival_airport, rp.tickets_bought
-FROM rpop AS rp
+FROM route_pop AS rp
 WHERE 2 > (select count(rp2.tickets_bought)
-           FROM rpop AS rp2
+           FROM route_pop AS rp2
            WHERE rp2.tickets_bought > rp.tickets_bought
              AND rp.departure_airport = rp2.departure_airport)
 ORDER BY rp.departure_airport, rp.tickets_bought DESC;
 
-DROP TABLE rpop;
+DROP TABLE route_pop;

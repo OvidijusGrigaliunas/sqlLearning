@@ -1,5 +1,6 @@
+-- Kolkas jokios naudos
 CREATE TEMPORARY TABLE filtered_flights
-AS ((SELECT DISTINCT ON (t.ticket_no) t.ticket_no,
+AS (SELECT DISTINCT ON (t.ticket_no) t.ticket_no,
                                       tf.flight_id,
                                       f.scheduled_departure,
                                       f.departure_airport,
@@ -17,7 +18,7 @@ AS ((SELECT DISTINCT ON (t.ticket_no) t.ticket_no,
      FROM tickets AS t
               LEFT JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
               LEFT JOIN flights f ON f.flight_id = tf.flight_id
-     ORDER BY ticket_no ASC, scheduled_departure DESC));
+     ORDER BY ticket_no ASC, scheduled_departure DESC);
 SELECT a.ticket_no, a.flight_id, a.departure_airport, a.arrival_airport
 FROM (SELECT *,
              lag(departure_airport) OVER (partition by ticket_no ORDER BY ticket_no, scheduled_departure) AS aaa,

@@ -10,7 +10,7 @@ AS (SELECT f.departure_airport,
     FROM ticket_flights AS tf
              INNER JOIN flights f ON tf.flight_id = f.flight_id
              INNER JOIN tickets t ON tf.ticket_no = t.ticket_no
-    ORDER BY t.passenger_id, scheduled_departure);
+    ORDER BY passenger_id);
 CREATE TEMPORARY TABLE temp_table_return AS
 SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
        (ad2.airport_name ->> 'en') AS departure_airport,
@@ -24,7 +24,7 @@ FROM (
                 COUNT(rp2.scheduled_departure) AS return_tickets_bought
          FROM route_popularity AS rp1
                   LEFT JOIN route_popularity AS rp2
-             /* Tikriname ar yra skrydžių su tą priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
+             /* Tikriname ar yra skrydžių su priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
                             ON rp1.passenger_id = rp2.passenger_id AND rp1.arrival_airport = rp2.departure_airport AND
                                rp1.scheduled_arrival - rp2.scheduled_departure BETWEEN
                                    '0 years 0 mons -14 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'

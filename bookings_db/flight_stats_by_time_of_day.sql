@@ -1,3 +1,9 @@
+CREATE TEMPORARY TABLE flights_month
+AS (SELECT scheduled_departure, departure_airport, arrival_airport, flight_id
+    FROM flights
+    WHERE extract(YEARS FROM scheduled_departure) = 2017
+      AND extract(MONTH FROM scheduled_departure) = 6);
+
 CREATE TEMPORARY TABLE tickets_bought_time_of_day
 AS (SELECT f.departure_airport,
            f.arrival_airport,
@@ -19,7 +25,7 @@ AS (SELECT f.departure_airport,
            COUNT(CASE
                      WHEN extract(HOURS FROM f.scheduled_departure) BETWEEN 20 AND 23
                          THEN 1 END) AS tickets_between_20_and_24
-    FROM flights as f
+    FROM flights_month as f
              INNER JOIN ticket_flights tf on f.flight_id = tf.flight_id
     GROUP BY f.departure_airport, f.arrival_airport);
 CREATE TEMPORARY TABLE flights_time_of_day
@@ -44,7 +50,7 @@ AS (SELECT a.*
                  COUNT(CASE
                            WHEN extract(HOURS FROM f.scheduled_departure) BETWEEN 20 AND 23
                                THEN 1 END) AS flights_between_20_and_24
-          FROM flights as f
+          FROM flights_month as f
           GROUP BY f.departure_airport, f.arrival_airport) as a);
 SELECT f.departure_airport,
        f.arrival_airport,
@@ -63,4 +69,4 @@ SELECT f.departure_airport,
 FROM flights_time_of_day AS f
          LEFT JOIN tickets_bought_time_of_day t
                    on f.arrival_airport = t.arrival_airport AND f.departure_airport = t.departure_airport;
-DROP TABLE flights_time_of_day, tickets_bought_time_of_day;
+DROP TABLE flights_time_of_day, tickets_bought_time_of_day, flights_month;
