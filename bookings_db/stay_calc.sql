@@ -1,3 +1,7 @@
+-- V2 versija yra apie 3-4 kart greitesnė
+-- Užtrunka vidutiniškai 2 min 50 sec, o V2 45sec
+-- Kažkodėl padidėja ticket_boughts keičiant data, nors įtakos neturėtų būti
+
 /* Šitas query surenką skrydžių informacija kaip išvykimo, atvykimo datas, oro uostų id. Pagal skydžio
    id surandame bilietio id, pagal kurį žinome, kuris keleivis jį pirko. Pagal tai galėsime sužinoti kiek
    keleivių pirko bilietą atgal  */
@@ -7,12 +11,13 @@ AS (SELECT f.departure_airport,
            t.passenger_id,
            f.scheduled_departure,
            f.scheduled_arrival
-    FROM ticket_flights AS tf
-             INNER JOIN flights f ON tf.flight_id = f.flight_id
-             INNER JOIN tickets t ON tf.ticket_no = t.ticket_no
-    ORDER BY passenger_id);
-CREATE TEMPORARY TABLE temp_table_return AS
-SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
+    FROM tickets AS t
+             INNER JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
+             INNER JOIN flights f on tf.flight_id = f.flight_id
+        /* Surikiuoja informacija pagal keleivį. Pagreitina join kitose query dalyse. */
+    ORDER BY passenger_id, scheduled_departure);
+CREATE TEMPORARY TABLE temp_table_return
+    AS(SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
        (ad2.airport_name ->> 'en') AS departure_airport,
        rp2.tickets_bought,
        rp2.return_tickets_bought
@@ -27,11 +32,11 @@ FROM (
              /* Tikriname ar yra skrydžių su priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
                             ON rp1.passenger_id = rp2.passenger_id AND rp1.arrival_airport = rp2.departure_airport AND
                                rp1.scheduled_arrival - rp2.scheduled_departure BETWEEN
-                                   '0 years 0 mons -14 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'
+                                   '0 years 0 mons -9 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'
          GROUP BY rp1.arrival_airport, rp1.departure_airport) AS rp2
          /* Oro uosto id pakeičiame į jo pavadinimą*/
          INNER JOIN airports_data ad1 ON ad1.airport_code = rp2.arrival_airport
-         INNER JOIN airports_data ad2 ON ad2.airport_code = rp2.departure_airport;
+         INNER JOIN airports_data ad2 ON ad2.airport_code = rp2.departure_airport);
 
 CREATE TEMPORARY TABLE calc_distances
 AS (SELECT a.departure_airport,

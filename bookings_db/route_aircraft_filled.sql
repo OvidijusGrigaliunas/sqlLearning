@@ -1,3 +1,4 @@
+-- Senas query, antra versija yra apie 8-9 kartus greitesnė
 CREATE TEMPORARY TABLE testas
 AS (SELECT DISTINCT f.year,
                     f.month,

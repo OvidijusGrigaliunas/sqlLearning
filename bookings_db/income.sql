@@ -1,13 +1,12 @@
-WITH sold_tickets AS (SELECT DISTINCT extract(YEAR from b2.book_date)       AS year,
-                                      extract(Month from b2.book_date)      AS month,
-                                      count(tf2.ticket_no)
-                                      OVER (PARTITION BY extract(YEAR from b2.book_date),
-                                          extract(Month from b2.book_date)) AS monthly_tickets_sold
+WITH sold_tickets AS (SELECT extract(YEAR from b2.book_date)  AS year,
+                             extract(Month from b2.book_date) AS month,
+                             count(tf2.ticket_no)             AS monthly_tickets_sold
                       FROM bookings AS b2
                                INNER JOIN tickets t2 ON b2.book_ref = t2.book_ref
                                INNER JOIN ticket_flights tf2 on t2.ticket_no = tf2.ticket_no
                                INNER JOIN flights f ON tf2.flight_id = f.flight_id
-                      WHERE f.status <> 'Cancelled')
+                      WHERE f.status <> 'Cancelled'
+                      GROUP BY extract(YEAR from b2.book_date), extract(Month from b2.book_date))
 SELECT b.year,
        b.month,
        b.monthly_income,
@@ -17,7 +16,9 @@ SELECT b.year,
        OVER (PARTITION BY b.year)                          AS yearly_income,
        sum(t.monthly_tickets_sold)
        OVER (PARTITION BY b.year)                          AS yearly_tickets_sold
-FROM (SELECT DISTINCT b.year, b.month, sum(b.amount) AS monthly_income
+FROM (SELECT b.year,
+             b.month,
+             sum(b.amount) AS monthly_income
       FROM (SELECT extract(YEAR from b.book_date)  AS year,
                    extract(Month from b.book_date) AS month,
                    tf.amount
