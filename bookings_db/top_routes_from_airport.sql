@@ -8,7 +8,7 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
           FROM flights AS f
                    LEFT JOIN ticket_flights tf ON f.flight_id = tf.flight_id
           GROUP BY f.departure_airport, f.arrival_airport
-          ORDER BY count(tf.ticket_no) DESC) as a
+          ORDER BY count(tf.ticket_no) DESC) AS a
              INNER JOIN airports_data ad1
                         ON ad1.airport_code = a.arrival_airport
              INNER JOIN airports_data ad2 ON ad2.airport_code = a.departure_airport);

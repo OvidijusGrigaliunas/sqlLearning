@@ -1,3 +1,4 @@
+-- suranda tuščias vietas skrydyje
 WITH not_empty_seats AS (SELECT DISTINCT f.aircraft_code, bp.seat_no
                          FROM flights AS f
                                   LEFT JOIN boarding_passes bp ON f.flight_id = bp.flight_id

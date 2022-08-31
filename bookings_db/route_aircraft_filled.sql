@@ -31,4 +31,5 @@ SELECT a.year,
        round(cast(a.total_seats_used AS numeric) / NULLIF(total_seats, 0) * 100, 2) AS percentage_filled
 FROM testas AS a
 ORDER BY route, a.year, a.month;
+
 DROP TABLE testas;

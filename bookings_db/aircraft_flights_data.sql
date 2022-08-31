@@ -14,7 +14,7 @@ SELECT stats.aircraft_code,
        stats.total_seats,
        stats.total_flights,
        a.tickets_bought,
-       round(cast(a.tickets_bought as numeric) / (stats.tot al_flights * total_seats) * 100, 2) AS percentage_filled_avg
+       round(cast(a.tickets_bought as numeric) / (stats.total_flights * total_seats) * 100, 2) AS percentage_filled_avg
 FROM aircraft_stats AS stats
          LEFT JOIN (SELECT ad2.aircraft_code, count(tf.ticket_no) AS tickets_bought
                     FROM aircrafts_data AS ad2

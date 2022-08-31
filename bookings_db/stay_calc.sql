@@ -1,5 +1,5 @@
 -- V2 versija yra apie 3-4 kart greitesnė
--- Užtrunka vidutiniškai 2 min 50 sec, o V2 45sec
+-- Užtrunka vidutiniškai 2 min 50 sec, o V2 50sec
 -- Kažkodėl padidėja ticket_boughts keičiant data, nors įtakos neturėtų būti
 
 /* Šitas query surenką skrydžių informacija kaip išvykimo, atvykimo datas, oro uostų id. Pagal skydžio
@@ -13,7 +13,7 @@ AS (SELECT f.departure_airport,
            f.scheduled_arrival
     FROM tickets AS t
              INNER JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
-             INNER JOIN flights f on tf.flight_id = f.flight_id
+             INNER JOIN flights f ON tf.flight_id = f.flight_id
         /* Surikiuoja informacija pagal keleivį. Pagreitina join kitose query dalyse. */
     ORDER BY passenger_id, scheduled_departure);
 CREATE TEMPORARY TABLE temp_table_return

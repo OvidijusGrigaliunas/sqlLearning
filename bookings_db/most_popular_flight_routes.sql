@@ -1,3 +1,4 @@
+-- Populiariausios skrydžių kryptys
 SELECT (ad1.airport_name ->> 'en')                                                       AS departure_airport,
        (ad2.airport_name ->> 'en')                                                       AS arrival_airport,
        f2.tickets_bought,

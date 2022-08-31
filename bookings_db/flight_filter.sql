@@ -1,4 +1,5 @@
 -- Kolkas jokios naudos
+-- Nebepamemu ką tiksliai čia daro. Tikriausiai ištrinsių failą.
 CREATE TEMPORARY TABLE filtered_flights
 AS (SELECT DISTINCT ON (t.ticket_no) t.ticket_no,
                                       tf.flight_id,

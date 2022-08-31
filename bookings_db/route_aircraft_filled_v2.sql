@@ -1,6 +1,5 @@
 -- skrydžių skaičius pagal kryptį ir lėktuvo modelį
-
-CREATE TEMPORARY TABLE test
+CREATE TEMPORARY TABLE flight_count
 AS (SELECT concat(departure_airport, '-', arrival_airport) AS route,
            aircraft_code,
            count(flight_id)                                AS flight_num,
@@ -10,7 +9,7 @@ AS (SELECT concat(departure_airport, '-', arrival_airport) AS route,
     GROUP BY concat(departure_airport, '-', arrival_airport), aircraft_code, extract(YEAR FROM scheduled_departure),
              extract(MONTH FROM scheduled_departure));
 -- nupirktų bilietų kiekis pagal kryptį ir lėktuvo modelį
-CREATE TEMPORARY TABLE test2
+CREATE TEMPORARY TABLE ticket_count
 AS (SELECT concat(departure_airport, '-', arrival_airport) AS route,
            aircraft_code,
            count(tf.ticket_no)                             AS tickets_bought,
@@ -25,7 +24,7 @@ CREATE TEMPORARY TABLE seat_count
 AS (SELECT aircraft_code, count(seat_no) AS seat_num
     FROM seats
     GROUP BY aircraft_code);
--- Visų stalų join, kad
+-- Susumuoja skrydžių kiekį, galimų sedynių skaičių ir panaudotų sedynių skaičių pagal maršrūtą ir datą.
 CREATE TEMPORARY TABLE testas
 AS (SELECT t.year,
            t.month,
@@ -33,11 +32,13 @@ AS (SELECT t.year,
            sum(t.flight_num)               AS total_flights,
            sum(t.flight_num * sc.seat_num) AS total_seats,
            sum(t2.tickets_bought)          AS total_seats_used
-    FROM test AS t
-             INNER JOIN test2 t2 on t.aircraft_code = t2.aircraft_code AND t.year = t2.year AND t.month = t2.month AND
-                                    t.route = t2.route
+    FROM flight_count AS t
+             INNER JOIN ticket_count t2
+                        ON t.aircraft_code = t2.aircraft_code AND t.year = t2.year AND t.month = t2.month AND
+                           t.route = t2.route
              INNER JOIN seat_count sc ON t.aircraft_code = sc.aircraft_code
     GROUP BY t.year, t.month, t.route, t2.tickets_bought);
+-- Atvaizdavimas
 SELECT a.year,
        a.month,
        a.route,
@@ -48,7 +49,7 @@ SELECT a.year,
 FROM testas AS a
 ORDER BY route, a.year, a.month;
 
-DROP TABLE test;
-DROP TABLE test2;
+DROP TABLE flight_count;
+DROP TABLE ticket_count;
 DROP TABLE seat_count;
 DROP TABLE testas;
