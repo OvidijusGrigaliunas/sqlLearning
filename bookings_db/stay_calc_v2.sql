@@ -34,7 +34,7 @@ AS (SELECT departure_airport,
                  lag(arrival_airport) OVER ()   AS prev_airport
           FROM route_popularity) AS rp
     WHERE rp.scheduled_departure - rp.prev_arrival BETWEEN
-        '0 years 0 mons 0 days 0 hours 0 min 0.0 secs' AND '10 years 0 mons 0 days 0 hours 0 min 0.0 secs'
+        '0 years 0 mons 0 days 0 hours 0 min 0.0 secs' AND '2 years 0 mons 0 days 0 hours 0 min 0.0 secs'
       AND rp.passenger_id = rp.prev_passenger_id
       AND prev_airport = departure_airport);
 -- Apskaičiuoja atstuma tarp dviejų oro uostų.
@@ -74,16 +74,19 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
              INNER JOIN airports_data ad2
                         ON ad2.airport_code = fbs.arrival_airport OR ad2.airport_code = tbt.arrival_airport);
 -- Visos info atvaizdavimas
+DROP TABLE route_stay_stats;
+CREATE TABLE route_stay_stats AS
 SELECT cd.departure_airport,
        cd.arrival_airport,
        cd.departure_city,
        cd.arrival_city,
        cd.distance,
-       coalesce(stt.tickets_bought, 0)         AS tickets_bought,
-       coalesce(stt.stayed_for_time_period, 0) AS stayed_for_time_period,
+       coalesce(stt.tickets_bought, 0)                             AS tickets_bought,
+       coalesce(stt.stayed_for_time_period, 0)                     AS stayed_for_time_period,
        coalesce(ROUND(cast(stayed_for_time_period AS numeric) / nullif(tickets_bought, 0) * 100, 2),
-                0)                             AS percentage_stayed,
-       stt.average_stay_duration
+                0)                                                 AS percentage_stayed,
+       round(extract(DAYS FROM stt.average_stay_duration) + extract(HOURS FROM stt.average_stay_duration) /
+                                                            24, 2) AS average_stay_duration_in_days
 FROM stay_ticket_table AS stt
          RIGHT JOIN calc_distances cd
                     ON stt.arrival_airport = cd.arrival_airport AND stt.departure_airport = cd.departure_airport
