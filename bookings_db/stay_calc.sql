@@ -17,26 +17,27 @@ AS (SELECT f.departure_airport,
         /* Surikiuoja informacija pagal keleivį. Pagreitina join kitose query dalyse. */
     ORDER BY passenger_id, scheduled_departure);
 CREATE TEMPORARY TABLE temp_table_return
-    AS(SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
-       (ad2.airport_name ->> 'en') AS departure_airport,
-       rp2.tickets_bought,
-       rp2.return_tickets_bought
-FROM (
+AS (SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
+           (ad2.airport_name ->> 'en') AS departure_airport,
+           rp2.tickets_bought,
+           rp2.return_tickets_bought
+    FROM (
 /* Šitas subquery nustato kiek bilietų buvo pirktą skristi šia kryptimi ir kiek buvo pirktą bilietų grižti atgal */
-         SELECT rp1.arrival_airport,
-                rp1.departure_airport,
-                COUNT(rp1.scheduled_departure) AS tickets_bought,
-                COUNT(rp2.scheduled_departure) AS return_tickets_bought
-         FROM route_popularity AS rp1
-                  LEFT JOIN route_popularity AS rp2
-             /* Tikriname ar yra skrydžių su priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
-                            ON rp1.passenger_id = rp2.passenger_id AND rp1.arrival_airport = rp2.departure_airport AND
-                               rp1.scheduled_arrival - rp2.scheduled_departure BETWEEN
-                                   '0 years 0 mons -9 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'
-         GROUP BY rp1.arrival_airport, rp1.departure_airport) AS rp2
-         /* Oro uosto id pakeičiame į jo pavadinimą*/
-         INNER JOIN airports_data ad1 ON ad1.airport_code = rp2.arrival_airport
-         INNER JOIN airports_data ad2 ON ad2.airport_code = rp2.departure_airport);
+             SELECT rp1.arrival_airport,
+                    rp1.departure_airport,
+                    COUNT(rp1.scheduled_departure) AS tickets_bought,
+                    COUNT(rp2.scheduled_departure) AS return_tickets_bought
+             FROM route_popularity AS rp1
+                      LEFT JOIN route_popularity AS rp2
+                 /* Tikriname ar yra skrydžių su priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
+                                ON rp1.passenger_id = rp2.passenger_id AND
+                                   rp1.arrival_airport = rp2.departure_airport AND
+                                   rp1.scheduled_arrival - rp2.scheduled_departure BETWEEN
+                                       '0 years 0 mons -9 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'
+             GROUP BY rp1.arrival_airport, rp1.departure_airport) AS rp2
+             /* Oro uosto id pakeičiame į jo pavadinimą*/
+             INNER JOIN airports_data ad1 ON ad1.airport_code = rp2.arrival_airport
+             INNER JOIN airports_data ad2 ON ad2.airport_code = rp2.departure_airport);
 
 CREATE TEMPORARY TABLE calc_distances
 AS (SELECT a.departure_airport,

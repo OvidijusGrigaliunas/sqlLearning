@@ -15,7 +15,7 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
 
 SELECT rp.departure_airport, rp.arrival_airport, rp.tickets_bought
 FROM route_pop AS rp
-WHERE 2 > (select count(rp2.tickets_bought)
+WHERE 2 > (SELECT count(rp2.tickets_bought)
            FROM route_pop AS rp2
            WHERE rp2.tickets_bought > rp.tickets_bought
              AND rp.departure_airport = rp2.departure_airport)

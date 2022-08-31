@@ -45,7 +45,7 @@ SELECT a.year,
        a.total_flights,
        a.total_seats,
        a.total_seats_used,
-       round(cast(a.total_seats_used AS numeric) / NULLIF(total_seats, 0) * 100, 2) AS percentage_filled
+       round(cast(a.total_seats_used AS NUMERIC) / NULLIF(total_seats, 0) * 100, 2) AS percentage_filled
 FROM testas AS a
 ORDER BY route, a.year, a.month;
 

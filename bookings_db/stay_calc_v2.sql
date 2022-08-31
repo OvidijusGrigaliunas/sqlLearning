@@ -67,6 +67,7 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
                  avg(stay_duration)         AS average_stay_duration
           FROM filtered_by_stay
           GROUP BY departure_airport, arrival_airport) AS fbs
+             -- FULL JOIN, nes abu table gali neturėti visų krypčių, tai kad neprarastume duomenų, darome FULL JOIN. :)
              FULL JOIN tickets_bought_table tbt
                        ON tbt.departure_airport = fbs.departure_airport AND tbt.arrival_airport = fbs.arrival_airport
              INNER JOIN airports_data ad1
@@ -83,7 +84,7 @@ SELECT cd.departure_airport,
        cd.distance,
        coalesce(stt.tickets_bought, 0)                             AS tickets_bought,
        coalesce(stt.stayed_for_time_period, 0)                     AS stayed_for_time_period,
-       coalesce(ROUND(cast(stayed_for_time_period AS numeric) / nullif(tickets_bought, 0) * 100, 2),
+       coalesce(ROUND(cast(stayed_for_time_period AS NUMERIC) / nullif(tickets_bought, 0) * 100, 2),
                 0)                                                 AS percentage_stayed,
        round(extract(DAYS FROM stt.average_stay_duration) + extract(HOURS FROM stt.average_stay_duration) /
                                                             24, 2) AS average_stay_duration_in_days
