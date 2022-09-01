@@ -29,9 +29,9 @@ AS (SELECT departure_airport,
                  passenger_id,
                  scheduled_departure,
                  scheduled_arrival,
-                 lag(scheduled_arrival) OVER () AS prev_arrival,
-                 lag(passenger_id) OVER ()      AS prev_passenger_id,
-                 lag(arrival_airport) OVER ()   AS prev_airport
+                 LAG(scheduled_arrival) OVER () AS prev_arrival,
+                 LAG(passenger_id) OVER ()      AS prev_passenger_id,
+                 LAG(arrival_airport) OVER ()   AS prev_airport
           FROM route_popularity) AS rp
     WHERE rp.scheduled_departure - rp.prev_arrival BETWEEN
         '0 years 0 mons 0 days 0 hours 0 min 0.0 secs' AND '2 years 0 mons 0 days 0 hours 0 min 0.0 secs'
@@ -50,7 +50,7 @@ AS (SELECT DISTINCT (ad1.airport_name ->> 'en')                            AS de
              INNER JOIN airports_data ad2 ON ad2.airport_code = f.arrival_airport);
 -- Apskaičiuoja kiek bilietų buvo pirkti maršrutui
 CREATE TEMPORARY TABLE tickets_bought_table
-AS (SELECT count(scheduled_departure) AS tickets_bought, departure_airport, arrival_airport
+AS (SELECT COUNT(scheduled_departure) AS tickets_bought, departure_airport, arrival_airport
     FROM route_popularity AS rp
     GROUP BY departure_airport, arrival_airport);
 -- Apskačiuoja kiek žmonių išbūvo tam tikrą laika tarpą(pagal filtered_by_stay where)
@@ -63,8 +63,8 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
            average_stay_duration
     FROM (SELECT departure_airport,
                  arrival_airport,
-                 count(scheduled_departure) AS stayed_for_time_period,
-                 avg(stay_duration)         AS average_stay_duration
+                 COUNT(scheduled_departure) AS stayed_for_time_period,
+                 AVG(stay_duration)         AS average_stay_duration
           FROM filtered_by_stay
           GROUP BY departure_airport, arrival_airport) AS fbs
              -- FULL JOIN, nes abu table gali neturėti visų krypčių, tai kad neprarastume duomenų, darome FULL JOIN. :)
@@ -82,16 +82,16 @@ SELECT cd.departure_airport,
        cd.departure_city,
        cd.arrival_city,
        cd.distance,
-       coalesce(stt.tickets_bought, 0)                             AS tickets_bought,
-       coalesce(stt.stayed_for_time_period, 0)                     AS stayed_for_time_period,
-       coalesce(ROUND(cast(stayed_for_time_period AS NUMERIC) / nullif(tickets_bought, 0) * 100, 2),
+       COALESCE(stt.tickets_bought, 0)                             AS tickets_bought,
+       COALESCE(stt.stayed_for_time_period, 0)                     AS stayed_for_time_period,
+       COALESCE(ROUND(CAST(stayed_for_time_period AS NUMERIC) / NULLIF(tickets_bought, 0) * 100, 2),
                 0)                                                 AS percentage_stayed,
-       round(extract(DAYS FROM stt.average_stay_duration) + extract(HOURS FROM stt.average_stay_duration) /
+       ROUND(EXTRACT(DAYS FROM stt.average_stay_duration) + EXTRACT(HOURS FROM stt.average_stay_duration) /
                                                             24, 2) AS average_stay_duration_in_days
 FROM stay_ticket_table AS stt
          RIGHT JOIN calc_distances cd
                     ON stt.arrival_airport = cd.arrival_airport AND stt.departure_airport = cd.departure_airport
-ORDER BY coalesce(stt.tickets_bought, 0) DESC;
+ORDER BY COALESCE(stt.tickets_bought, 0) DESC;
 
 DROP TABLE route_popularity;
 DROP TABLE filtered_by_stay;

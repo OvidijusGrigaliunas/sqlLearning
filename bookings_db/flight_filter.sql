@@ -23,9 +23,9 @@ UNION
  ORDER BY ticket_no ASC, scheduled_departure DESC);
 SELECT a.ticket_no, a.flight_id, a.departure_airport, a.arrival_airport
 FROM (SELECT *,
-             lag(departure_airport) OVER (PARTITION BY ticket_no ORDER BY ticket_no, scheduled_departure) AS aaa,
-             lag(arrival_airport) OVER (PARTITION BY ticket_no ORDER BY ticket_no, scheduled_departure)   AS aa,
-             lag(arrival_airport) OVER (PARTITION BY ticket_no ORDER BY ticket_no, scheduled_departure)   AS a
+             LAG(departure_airport) OVER (PARTITION BY ticket_no ORDER BY ticket_no, scheduled_departure) AS aaa,
+             LAG(arrival_airport) OVER (PARTITION BY ticket_no ORDER BY ticket_no, scheduled_departure)   AS aa,
+             LAG(arrival_airport) OVER (PARTITION BY ticket_no ORDER BY ticket_no, scheduled_departure)   AS a
       FROM filtered_flights) AS a
 WHERE (a.departure_airport = a.aaa AND a.arrival_airport = a.aa)
    OR a.ticket_no <> a.a;

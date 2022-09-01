@@ -67,7 +67,7 @@ AS (SELECT ttr1.departure_airport,
            cd.distance,
            ttr1.tickets_bought AS tickets_bought,
            ttr1.return_tickets_bought,
-           round((CAST(COALESCE(ttr1.return_tickets_bought, 0) AS NUMERIC) /
+           ROUND((CAST(COALESCE(ttr1.return_tickets_bought, 0) AS NUMERIC) /
                   NULLIF(ttr1.tickets_bought, 0)) *
                  100, 2)       AS return_percentage
     FROM temp_table_return AS ttr1

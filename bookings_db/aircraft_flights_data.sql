@@ -1,7 +1,7 @@
-WITH aircraft_stats AS (SELECT ad.aircraft_code, ad.model, ad.total_seats, count(f.flight_id) AS total_flights
+WITH aircraft_stats AS (SELECT ad.aircraft_code, ad.model, ad.total_seats, COUNT(f.flight_id) AS total_flights
                         FROM (SELECT ad.aircraft_code,
                                      (ad.model ->> 'en') AS model,
-                                     count(s.seat_no)    AS total_seats
+                                     COUNT(s.seat_no)    AS total_seats
                               FROM aircrafts_data AS ad
                                        LEFT JOIN seats s
                                                  ON ad.aircraft_code = s.aircraft_code
@@ -14,9 +14,9 @@ SELECT stats.aircraft_code,
        stats.total_seats,
        stats.total_flights,
        a.tickets_bought,
-       round(cast(a.tickets_bought AS NUMERIC) / (stats.total_flights * total_seats) * 100, 2) AS percentage_filled_avg
+       ROUND(CAST(a.tickets_bought AS NUMERIC) / (stats.total_flights * total_seats) * 100, 2) AS percentage_filled_avg
 FROM aircraft_stats AS stats
-         LEFT JOIN (SELECT ad2.aircraft_code, count(tf.ticket_no) AS tickets_bought
+         LEFT JOIN (SELECT ad2.aircraft_code, COUNT(tf.ticket_no) AS tickets_bought
                     FROM aircrafts_data AS ad2
                              INNER JOIN flights f2 ON ad2.aircraft_code = f2.aircraft_code
                              INNER JOIN ticket_flights tf ON f2.flight_id = tf.flight_id

@@ -17,7 +17,7 @@ SELECT b.book_ref,
        (ad2.airport_name ->> 'en')                 AS arrival_airport
 FROM (SELECT *
       FROM bookings
-      LIMIT 500) as b
+      LIMIT 500) AS b
          INNER JOIN tickets t ON b.book_ref = t.book_ref
          INNER JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
          INNER JOIN flights f ON tf.flight_id = f.flight_id

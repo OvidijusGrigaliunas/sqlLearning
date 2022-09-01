@@ -4,11 +4,11 @@ SELECT t.passenger_id,
        b.book_date,
        tf.fare_conditions,
        tf.amount,
-       concat(f.departure_airport, '-', f.arrival_airport) AS route,
+       CONCAT(f.departure_airport, '-', f.arrival_airport) AS route,
        f.scheduled_departure,
        f.scheduled_arrival,
        f.status,
-       sum(tf.amount) OVER (PARTITION BY t.ticket_no)      AS total_amount
+       SUM(tf.amount) OVER (PARTITION BY t.ticket_no)      AS total_amount
 FROM (SELECT passenger_id,
              ticket_no,
              book_ref
