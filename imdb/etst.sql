@@ -4,10 +4,10 @@ SELECT s.tconst                          AS id,
        r."numVotes"                      AS total_votes,
        s."startYear"                     AS released,
        s.genres                          AS genre,
-       string_agg(d."primaryName", ', ') AS directors
-FROM shows as s
-         INNER JOIN ratings r on s.tconst = r.tconst
-         INNER JOIN (SELECT crew.tconst, regexp_split_to_table(crew.directors, E',') AS directors FROM crew) AS c
+       STRING_AGG(d."primaryName", ', ') AS directors
+FROM shows AS s
+         INNER JOIN ratings r ON s.tconst = r.tconst
+         INNER JOIN (SELECT crew.tconst, REGEXP_SPLIT_TO_TABLE(crew.directors, E',') AS directors FROM crew) AS c
                     ON c.tconst = s.tconst
          INNER JOIN data AS d
                     ON d.nconst = c.directors

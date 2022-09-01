@@ -10,6 +10,7 @@ AS (SELECT f.departure_airport,
     FROM tickets AS t
              INNER JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
              INNER JOIN flights f ON tf.flight_id = f.flight_id
+    WHERE f.status = 'Arrived'
         /* Surikiuoja informacija pagal keleivį. Kad galėtume naudoti lag funkciją. */
     ORDER BY passenger_id, scheduled_departure);
 
@@ -34,7 +35,7 @@ AS (SELECT departure_airport,
                  LAG(arrival_airport) OVER ()   AS prev_airport
           FROM route_popularity) AS rp
     WHERE rp.scheduled_departure - rp.prev_arrival BETWEEN
-        '0 years 0 mons 0 days 0 hours 0 min 0.0 secs' AND '2 years 0 mons 0 days 0 hours 0 min 0.0 secs'
+        '0 years 0 mons 6 days 0 hours 0 min 0.0 secs' AND '10 years 0 mons 8 days 0 hours 0 min 0.0 secs'
       AND rp.passenger_id = rp.prev_passenger_id
       AND prev_airport = departure_airport);
 -- Apskaičiuoja atstuma tarp dviejų oro uostų.
@@ -67,7 +68,7 @@ AS (SELECT (ad1.airport_name ->> 'en') AS departure_airport,
                  AVG(stay_duration)         AS average_stay_duration
           FROM filtered_by_stay
           GROUP BY departure_airport, arrival_airport) AS fbs
-             -- FULL JOIN, nes abu table gali neturėti visų krypčių, tai kad neprarastume duomenų, darome FULL JOIN. :)
+             -- FULL JOIN, nes abu table gali neturėti visų krypčių, tai kad neprarastume duomenų iš abėjų table, darome FULL JOIN. :)
              FULL JOIN tickets_bought_table tbt
                        ON tbt.departure_airport = fbs.departure_airport AND tbt.arrival_airport = fbs.arrival_airport
              INNER JOIN airports_data ad1

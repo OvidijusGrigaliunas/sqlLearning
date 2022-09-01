@@ -8,7 +8,6 @@ WITH sold_tickets AS (SELECT EXTRACT(YEAR FROM b2.book_date)  AS year,
                                INNER JOIN tickets t2 ON b2.book_ref = t2.book_ref
                                INNER JOIN ticket_flights tf2 ON t2.ticket_no = tf2.ticket_no
                                INNER JOIN flights f ON tf2.flight_id = f.flight_id
-                      WHERE f.status <> 'Cancelled'
                       GROUP BY EXTRACT(YEAR FROM b2.book_date), EXTRACT(MONTH FROM b2.book_date))
 SELECT b.year,
        b.month,
@@ -30,8 +29,7 @@ FROM (
                FROM bookings AS b
                         INNER JOIN tickets t2 ON b.book_ref = t2.book_ref
                         INNER JOIN ticket_flights tf ON t2.ticket_no = tf.ticket_no
-                        INNER JOIN flights f ON tf.flight_id = f.flight_id
-               WHERE f.status <> 'Cancelled') AS b
+                        INNER JOIN flights f ON tf.flight_id = f.flight_id) AS b
          GROUP BY b.year, b.month) AS b
          INNER JOIN sold_tickets AS t
                     ON b.year = t.year AND b.month = t.month;
