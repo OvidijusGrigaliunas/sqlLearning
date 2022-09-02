@@ -25,31 +25,31 @@ AS (SELECT aircraft_code, COUNT(seat_no) AS seat_num
     FROM seats
     GROUP BY aircraft_code);
 -- Susumuoja skrydžių kiekį, galimų sedynių skaičių ir panaudotų sedynių skaičių pagal maršrūtą ir datą.
-CREATE TEMPORARY TABLE testas
-AS (SELECT t.year,
-           t.month,
-           t.route,
-           SUM(t.flight_num)               AS total_flights,
-           SUM(t.flight_num * sc.seat_num) AS total_seats,
-           SUM(t2.tickets_bought)          AS total_seats_used
-    FROM flight_count AS t
-             INNER JOIN ticket_count t2
-                        ON t.aircraft_code = t2.aircraft_code AND t.year = t2.year AND t.month = t2.month AND
-                           t.route = t2.route
-             INNER JOIN seat_count sc ON t.aircraft_code = sc.aircraft_code
-    GROUP BY t.year, t.month, t.route, t2.tickets_bought);
+CREATE TEMPORARY TABLE seat_stats
+AS (SELECT fc.year,
+           fc.month,
+           fc.route,
+           SUM(fc.flight_num)               AS total_flights,
+           SUM(fc.flight_num * sc.seat_num) AS total_seats,
+           SUM(tc2.tickets_bought)          AS total_seats_used
+    FROM flight_count AS fc
+             INNER JOIN ticket_count tc2
+                        ON fc.aircraft_code = tc2.aircraft_code AND fc.year = tc2.year AND fc.month = tc2.month AND
+                           fc.route = tc2.route
+             INNER JOIN seat_count sc ON fc.aircraft_code = sc.aircraft_code
+    GROUP BY fc.year, fc.month, fc.route);
 -- Atvaizdavimas
-SELECT a.year,
-       a.month,
-       a.route,
-       a.total_flights,
-       a.total_seats,
-       a.total_seats_used,
-       ROUND(CAST(a.total_seats_used AS NUMERIC) / NULLIF(total_seats, 0) * 100, 2) AS percentage_filled
-FROM testas AS a
-ORDER BY route, a.year, a.month;
+SELECT ss.year,
+       ss.month,
+       ss.route,
+       ss.total_flights,
+       ss.total_seats,
+       ss.total_seats_used,
+       ROUND(CAST(ss.total_seats_used AS NUMERIC) / NULLIF(total_seats, 0) * 100, 2) AS percentage_filled
+FROM seat_stats AS ss
+ORDER BY route, ss.year, ss.month;
 
 DROP TABLE flight_count;
 DROP TABLE ticket_count;
 DROP TABLE seat_count;
-DROP TABLE testas;
+DROP TABLE seat_stats;

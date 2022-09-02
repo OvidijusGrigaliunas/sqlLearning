@@ -4,7 +4,6 @@ SELECT (ad1.airport_name ->> 'en')                                              
        f2.tickets_bought,
        f2.profit,
        f2.avg_ticket_cost,
-       -- TODO: rasti tikslesnę atstumo funkciją (ne visi rezultatai yra tikslus)
        ROUND(CAST(point_distance(ad1.coordinates, ad2.coordinates) * 111 AS NUMERIC), 3) AS distance_km,
        ROUND(CAST(f2.avg_ticket_cost / (point_distance(ad1.coordinates, ad2.coordinates) * 111
            ) AS NUMERIC), 2)                                                             AS price_per_km

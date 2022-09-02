@@ -35,7 +35,7 @@ AS (SELECT departure_airport,
                  LAG(arrival_airport) OVER ()   AS prev_airport
           FROM route_popularity) AS rp
     WHERE rp.scheduled_departure - rp.prev_arrival BETWEEN
-        '0 years 0 mons 6 days 0 hours 0 min 0.0 secs' AND '10 years 0 mons 8 days 0 hours 0 min 0.0 secs'
+        '0 years 0 mons 0 days 0 hours 0 min 0.0 secs' AND '0 years 0 mons 7 days 0 hours 0 min 0.0 secs'
       AND rp.passenger_id = rp.prev_passenger_id
       AND prev_airport = departure_airport);
 -- Apskaičiuoja atstuma tarp dviejų oro uostų.

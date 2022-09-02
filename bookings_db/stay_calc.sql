@@ -32,8 +32,8 @@ AS (SELECT (ad1.airport_name ->> 'en') AS arrival_airport,
                  /* Tikriname ar yra skrydžių su priešinga kryptimi. Ir tikriname ar keleivis prabuvo tam tikrą laiko tarpą vietovėje*/
                                 ON rp1.passenger_id = rp2.passenger_id AND
                                    rp1.arrival_airport = rp2.departure_airport AND
-                                   rp1.scheduled_arrival - rp2.scheduled_departure BETWEEN
-                                       '0 years 0 mons -9 days 0 hours 0 mins 0.0 secs' AND '0 years 0 mons -2 days 0 hours 0 mins 0.0 secs'
+                                   rp2.scheduled_departure - rp1.scheduled_arrival BETWEEN
+                                       '0 years 0 mons 0 days 0 hours 1 mins 0.0 secs' AND '0 years 0 mons 7 days 0 hours 0 mins 0.0 secs'
              GROUP BY rp1.arrival_airport, rp1.departure_airport) AS rp2
              /* Oro uosto id pakeičiame į jo pavadinimą*/
              INNER JOIN airports_data ad1 ON ad1.airport_code = rp2.arrival_airport
