@@ -1,5 +1,5 @@
 SELECT a.flight_no, (ad1.airport_name ->> 'en') AS departure, (ad2.airport_name ->> 'en') AS arrival, a.tickets_bought
-FROM (SELECT f.flight_no, f.departure_airport, f.arrival_airport, COUNT(f.flight_id) AS tickets_bought
+FROM (SELECT f.flight_no, f.departure_airport, f.arrival_airport, COUNT(tf.flight_id) AS tickets_bought
       FROM flights AS f
                LEFT JOIN ticket_flights tf ON f.flight_id = tf.flight_id
       GROUP BY f.flight_no, f.departure_airport, f.arrival_airport
