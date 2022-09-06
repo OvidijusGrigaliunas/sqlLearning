@@ -83,12 +83,12 @@ SELECT cd.departure_airport,
        cd.departure_city,
        cd.arrival_city,
        cd.distance,
-       COALESCE(stt.tickets_bought, 0)                             AS tickets_bought,
-       COALESCE(stt.stayed_for_time_period, 0)                     AS stayed_for_time_period,
+       COALESCE(stt.tickets_bought, 0)                                          AS tickets_bought,
+       COALESCE(stt.stayed_for_time_period, 0)                                  AS stayed_for_time_period,
        COALESCE(ROUND(CAST(stayed_for_time_period AS NUMERIC) / NULLIF(tickets_bought, 0) * 100, 2),
-                0)                                                 AS percentage_stayed,
-       ROUND(EXTRACT(DAYS FROM stt.average_stay_duration) + EXTRACT(HOURS FROM stt.average_stay_duration) /
-                                                            24, 2) AS average_stay_duration_in_days
+                0)                                                              AS percentage_stayed,
+       COALESCE(ROUND(EXTRACT(DAYS FROM stt.average_stay_duration) + EXTRACT(HOURS FROM stt.average_stay_duration) /
+                                                                     24, 2), 0) AS average_stay_duration_in_days
 FROM stay_ticket_table AS stt
          RIGHT JOIN calc_distances cd
                     ON stt.arrival_airport = cd.arrival_airport AND stt.departure_airport = cd.departure_airport

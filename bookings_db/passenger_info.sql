@@ -15,6 +15,6 @@ FROM (SELECT passenger_id,
       FROM tickets
       WHERE passenger_id = '0000 004609') AS t
          INNER JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
-         INNER JOIN flights f ON f.flight_id = tf.flight_id
+         INNER JOIN flights f ON tf.flight_id = f.flight_id
          INNER JOIN bookings b ON t.book_ref = b.book_ref
 ORDER BY t.ticket_no, f.scheduled_departure;

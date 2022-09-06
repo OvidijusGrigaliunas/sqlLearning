@@ -54,18 +54,18 @@ AS (SELECT a.*
           GROUP BY f.departure_airport, f.arrival_airport) AS a);
 SELECT f.departure_airport,
        f.arrival_airport,
-       f.flights_between_0_and_4,
-       t.tickets_between_0_and_4,
-       f.flights_between_4_and_8,
-       t.tickets_between_4_and_8,
-       f.flights_between_8_and_12,
-       t.tickets_between_8_and_12,
-       f.flights_between_12_and_16,
-       t.tickets_between_12_and_16,
-       f.flights_between_16_and_20,
-       t.tickets_between_16_and_20,
-       f.flights_between_20_and_24,
-       t.tickets_between_20_and_24
+       COALESCE(f.flights_between_0_and_4, 0)   AS flights_between_0_and_4,
+       COALESCE(t.tickets_between_0_and_4, 0)   AS tickets_between_0_and_4,
+       COALESCE(f.flights_between_4_and_8, 0)   AS flights_between_4_and_8,
+       COALESCE(t.tickets_between_4_and_8, 0)   AS tickets_between_4_and_8,
+       COALESCE(f.flights_between_8_and_12, 0)  AS flights_between_8_and_12,
+       COALESCE(t.tickets_between_8_and_12, 0)  AS tickets_between_8_and_12,
+       COALESCE(f.flights_between_12_and_16, 0) AS flights_between_12_and_16,
+       COALESCE(t.tickets_between_12_and_16, 0) AS tickets_between_12_and_16,
+       COALESCE(f.flights_between_16_and_20, 0) AS flights_between_16_and_20,
+       COALESCE(t.tickets_between_16_and_20, 0) AS tickets_between_16_and_20,
+       COALESCE(f.flights_between_20_and_24, 0) AS flights_between_20_and_24,
+       COALESCE(t.tickets_between_20_and_24, 0) AS tickets_between_20_and_24
 FROM flights_time_of_day AS f
          LEFT JOIN tickets_bought_time_of_day t
                    ON f.arrival_airport = t.arrival_airport AND f.departure_airport = t.departure_airport;

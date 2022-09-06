@@ -17,16 +17,12 @@ SELECT b.year,
        OVER (PARTITION BY b.year)                          AS yearly_income,
        SUM(t.monthly_tickets_sold)
        OVER (PARTITION BY b.year)                          AS yearly_tickets_sold
-FROM (
-         SELECT b.year,
-                b.month,
-                SUM(b.amount) AS monthly_income
-         FROM (SELECT EXTRACT(YEAR FROM b.book_date)  AS year,
-                      EXTRACT(MONTH FROM b.book_date) AS month,
-                      tf.amount
-               FROM bookings AS b
-                        INNER JOIN tickets t2 ON b.book_ref = t2.book_ref
-                        INNER JOIN ticket_flights tf ON t2.ticket_no = tf.ticket_no) AS b
-         GROUP BY b.year, b.month) AS b
+FROM (SELECT EXTRACT(YEAR FROM b.book_date)  AS year,
+             EXTRACT(MONTH FROM b.book_date) AS month,
+             SUM(tf.amount)                  AS monthly_income
+      FROM bookings AS b
+               INNER JOIN tickets t2 ON b.book_ref = t2.book_ref
+               INNER JOIN ticket_flights tf ON t2.ticket_no = tf.ticket_no
+      GROUP BY EXTRACT(YEAR FROM b.book_date), EXTRACT(MONTH FROM b.book_date)) AS b
          INNER JOIN sold_tickets AS t
                     ON b.year = t.year AND b.month = t.month;
